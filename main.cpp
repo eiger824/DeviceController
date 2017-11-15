@@ -1,5 +1,6 @@
-#include "mainwindow.h"
 #include <QApplication>
+
+#include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
@@ -8,6 +9,7 @@ int main(int argc, char *argv[])
     w.show();
     // Query the statuses after the GUI is loaded
     w.getSlaveStatus();
+    w.printSlaves();
 
     return a.exec();
 }

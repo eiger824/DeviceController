@@ -8,17 +8,17 @@
 typedef struct Slave
 {
     Slave(QString ip, quint16 port,
-          QString name, bool stat):
+          QString name, unsigned id, bool stat):
         ipAdress(ip), portNr(port),
-        fullSlaveName(name), status(stat)
+        fullSlaveName(name), slaveID(id), status(stat)
     {}
 
     QString ipAdress;
     quint16 portNr = 3422; // Default
     QString fullSlaveName;
+    unsigned slaveID;
     bool status = false; // Offline by default
 } slave_t;
-
 
 namespace Ui {
 class MainWindow;
@@ -34,16 +34,20 @@ public:
 private:
     void setButtonFormat(unsigned b, bool onFocus);
     void slaveUpdatedStatus(unsigned index, bool status);
-    void setSlaveStatus(unsigned slave, bool status);
-    void printSlaves();
+    void setSlaveStatus(unsigned index, bool status);
+    void appendOnSlave(unsigned index, const QString& msg);
+    void updateOnlineSlaves();
+    bool pingSlave(slave_t *s);
 public:
     void getSlaveStatus();
+    void printSlaves();
 private slots:
     void on_pushButton_clicked();
     void on_pushButton_2_clicked();
     void on_pushButton_3_clicked();
     void on_pushButton_4_clicked();
     void timerTimeOut();
+    void statusTimerOut();
 
 private:
     QList<slave_t*> slaveList;
@@ -52,6 +56,7 @@ private:
 private:
     Ui::MainWindow *ui;
     QTimer *pingTimer;
+    QTimer *statusTimer;
 };
 
 #endif // MAINWINDOW_H
