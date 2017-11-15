@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/new/images">
+        <file>rpi.jpg</file>
+        <file>tkb.jpe</file>
+        <file>wbd.jpe</file>
+        <file>bbb.jpe</file>
+        <file>off.jpg</file>
+        <file>on.png</file>
+        <file>bbb.png</file>
+        <file>rpi.png</file>
+    </qresource>
+</RCC>
