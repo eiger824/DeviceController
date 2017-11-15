@@ -10,7 +10,8 @@ static QString notCurrentSheet = "background-color: rgb(255, 255, 255);";
 
 void MainWindow::setButtonFormat(unsigned b, bool onFocus)
 {
-    if (b >= nrSlaves) return;
+    if (b >= nrSlaves)
+        return;
     switch (b)
     {
     case 0:
