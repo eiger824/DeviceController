@@ -176,17 +176,28 @@ bool MainWindow::pingSlave(slave_t *s)
     char data[4];
     data[0] = s->slaveID; // Host ID, destination
     data[1] = 0x00; // HP host, source
-    data[1] = 0x1a; // Ping
-    data[2] = 0x00;
-    tcpSocket->write(data, 3);
+    data[2] = 0x1a; // Ping
+    data[3] = 0x00;
+    quint64 nb = tcpSocket->write(data, 3);
     if (!tcpSocket->waitForBytesWritten(1000))
         return false;
+    qDebug() << nb << " bytes were written!";
 
-    // Read Pong
     char rsp[4];
-    quint64 nb = tcpSocket->read(rsp, 3);
-    rsp[nb] = 0x00;
+    // Read Pong
+    if (!tcpSocket->waitForReadyRead(1000))
+    {
+        return false;
+    }
     // Check if valid
+    if ((nb = tcpSocket->read(rsp, 3)) < 0)
+    {
+        return false;
+    }
+    qDebug() << nb << " bytes were read!";
+
+    rsp[nb] = 0x00;
+    if (rsp[0] != 0x00)
     {
         return false;
     }
@@ -341,7 +352,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setButtonFormat(2, false);
     setButtonFormat(3, false);
 
-    slaveList.append(new slave_t(QString("192.168.1.179"), 3422, QString("Raspberry Pi 3"), 1, false));
+    slaveList.append(new slave_t(QString("127.0.0.1"), 3422, QString("Raspberry Pi 3"), 1, false));
     slaveList.append(new slave_t(QString("192.168.1.102"), 3422, QString("BeagleBone Black Wireless"), 2, false));
     slaveList.append(new slave_t(QString("192.168.1.179"), 3422, QString("Wandboard Dual Rev. D1"), 3, false));
     slaveList.append(new slave_t(QString("192.168.1.203"), 3422, QString("Tinker Board"), 4, false));
