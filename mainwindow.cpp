@@ -1,4 +1,4 @@
-#include <QPushButton>
+#include <QDebug>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -81,7 +81,7 @@ void MainWindow::setButtonFormat(unsigned b, bool onFocus)
     }
 }
 
-void MainWindow::slaveUpdatedStatus(unsigned index, bool status)
+void MainWindow::setSlaveStatus(unsigned index, bool status)
 {
     if (index >= slaveList.size()) return;
 
@@ -126,7 +126,36 @@ void MainWindow::slaveUpdatedStatus(unsigned index, bool status)
     }
 }
 
+void MainWindow::printSlaves()
+{
+    for (unsigned i=0; i<slaveList.size(); ++i)
+    {
+        slave_t *s = slaveList.at(i);
+        qDebug() << "Host " << s->fullSlaveName
+                 << " (" << s->ipAdress << "@" << s->portNr << ")"
+                 << " is " << (s->status ? "online" : "offline");
+    }
+}
+
+void MainWindow::getSlaveStatus()
+{
+    // Do the address scanning here
+    for (unsigned i=0; i<slaveList.size(); ++i)
+    {
+        qDebug() << "Connecting to : " << slaveList.at(i)->ipAdress;
+        tcpSocket->abort();
+        tcpSocket->connectToHost(slaveList.at(i)->ipAdress,
+                                 slaveList.at(i)->portNr);
+        // Wait at most half second
+       tcpSocket->waitForConnected(100);
+        setSlaveStatus(i,
+                       ((tcpSocket->socketDescriptor() != -1) ? true : false));
+        qDebug() << "Received socket descriptor: " << tcpSocket->socketDescriptor();
+    }
+}
+
 MainWindow::MainWindow(QWidget *parent) :
+    tcpSocket(new QTcpSocket(this)),
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
@@ -142,8 +171,10 @@ MainWindow::MainWindow(QWidget *parent) :
     slaveList.append(new slave_t(QString("192.168.1.179"), 3422, QString("Wandboard Dual Rev. D1"), false));
     slaveList.append(new slave_t(QString("192.168.1.203"), 3422, QString("Tinker Board"), false));
 
-    // Perform the address scanning on port 3422 to see which are online
-
+    pingTimer = new QTimer(this);
+    connect(pingTimer, SIGNAL(timeout()),
+            this, SLOT(timerTimeOut()));
+    pingTimer->start(5000);
 }
 
 MainWindow::~MainWindow()
@@ -201,4 +232,10 @@ void MainWindow::on_pushButton_4_clicked()
         setButtonFormat(3, true);
         ui->stackedWidget->setCurrentIndex(currentIndex);
     }
+}
+
+void MainWindow::timerTimeOut()
+{
+    // Call for
+    printSlaves();
 }
